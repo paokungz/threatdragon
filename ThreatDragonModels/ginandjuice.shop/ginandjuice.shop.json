@@ -1,27 +1,812 @@
 {
-  "version": "2.6.0",
   "summary": {
-    "title": "ginandjuice.shop",
-    "owner": "paokungz",
-    "description": "An E-commerce web application for ginandjuice.shop. The system handles product catalog browsing, user authentication, shopping cart management, and integrates with an external Payment Gateway. It processes and stores customer PII, order history, and product data.",
-    "id": 0
+    "title": "Gin & Juice Shop - Threat Model",
+    "owner": "Security Team",
+    "description": "Comprehensive STRIDE threat model for https://ginandjuice.shop - a deliberately vulnerable e-commerce web application by PortSwigger. This model covers all major attack surfaces including authentication, product catalog, shopping cart, blog, newsletter subscription, and coupon system.",
+    "id": 1,
+    "threatTop": 0
   },
   "detail": {
     "contributors": [],
     "diagrams": [
       {
-        "id": 0,
-        "title": "E-commerce Architecture",
+        "title": "Gin & Juice Shop - Data Flow Diagram (Main Architecture)",
         "diagramType": "STRIDE",
-        "placeholder": "New STRIDE diagram description",
-        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
-        "version": "2.6.0",
-        "cells": [],
-        "description": "ata flow diagram showing interactions between Customers, Admin, Web Application, Databases, and Payment Gateway."
+        "id": 0,
+        "version": "2.0",
+        "thumbnail": "./public/content/images/thumbnail.jpg",
+        "$$hashKey": "object:20",
+        "diagramJson": {
+          "cells": [
+            {
+              "type": "tm.BoundaryBox",
+              "size": { "width": 920, "height": 600 },
+              "position": { "x": 20, "y": 20 },
+              "angle": 0,
+              "id": "boundary-internet",
+              "z": 1,
+              "attrs": {
+                "text": { "text": "Internet / Public Zone" }
+              }
+            },
+            {
+              "type": "tm.BoundaryBox",
+              "size": { "width": 700, "height": 400 },
+              "position": { "x": 960, "y": 20 },
+              "angle": 0,
+              "id": "boundary-web",
+              "z": 1,
+              "attrs": {
+                "text": { "text": "Web Application Zone (ginandjuice.shop)" }
+              }
+            },
+            {
+              "type": "tm.BoundaryBox",
+              "size": { "width": 500, "height": 350 },
+              "position": { "x": 980, "y": 450 },
+              "angle": 0,
+              "id": "boundary-backend",
+              "z": 1,
+              "attrs": {
+                "text": { "text": "Backend / Database Zone" }
+              }
+            },
+            {
+              "type": "tm.Actor",
+              "size": { "width": 112, "height": 60 },
+              "position": { "x": 60, "y": 80 },
+              "angle": 0,
+              "id": "actor-anonymous-user",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Anonymous User\n(Browser)" }
+              },
+              "data": {
+                "type": "tm.Actor",
+                "name": "Anonymous User",
+                "description": "Unauthenticated visitor browsing the shop, viewing products, blog posts, and subscribing to newsletter.",
+                "outOfScope": false,
+                "reasonOutOfScope": "",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Spoofing",
+                    "title": "Attacker impersonates legitimate user session",
+                    "description": "Attacker can steal session cookies via XSS or network sniffing and impersonate a logged-in user.",
+                    "mitigation": "Use HttpOnly, Secure, SameSite=Strict cookie flags. Implement HTTPS everywhere. Use Content Security Policy.",
+                    "threatId": "T-001",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Actor",
+              "size": { "width": 112, "height": 60 },
+              "position": { "x": 60, "y": 200 },
+              "angle": 0,
+              "id": "actor-authenticated-user",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Authenticated User\n(carlos)" }
+              },
+              "data": {
+                "type": "tm.Actor",
+                "name": "Authenticated User",
+                "description": "Logged-in customer who can view account details, purchase products, and manage cart.",
+                "outOfScope": false,
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Elevation of Privilege",
+                    "title": "Horizontal privilege escalation between user accounts",
+                    "description": "User may access another user's account data by manipulating account ID parameters (e.g., /my-account?id=2).",
+                    "mitigation": "Implement server-side authorization checks. Never trust client-supplied user IDs.",
+                    "threatId": "T-002",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Actor",
+              "size": { "width": 112, "height": 60 },
+              "position": { "x": 60, "y": 320 },
+              "angle": 0,
+              "id": "actor-attacker",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Attacker\n(Malicious Actor)" }
+              },
+              "data": {
+                "type": "tm.Actor",
+                "name": "Attacker",
+                "description": "Malicious actor attempting to exploit vulnerabilities in the application.",
+                "outOfScope": false,
+                "hasOpenThreats": false,
+                "threats": []
+              }
+            },
+            {
+              "type": "tm.Actor",
+              "size": { "width": 112, "height": 60 },
+              "position": { "x": 60, "y": 440 },
+              "angle": 0,
+              "id": "actor-scanner",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Vulnerability\nScanner" }
+              },
+              "data": {
+                "type": "tm.Actor",
+                "name": "Vulnerability Scanner",
+                "description": "Automated web vulnerability scanner (e.g., Burp Suite) used to test the application.",
+                "outOfScope": true,
+                "reasonOutOfScope": "Intentional use case - app is designed for scanner testing",
+                "hasOpenThreats": false,
+                "threats": []
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1000, "y": 60 },
+              "angle": 0,
+              "id": "process-web-frontend",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Web Frontend\n(HTML/JS/CSS)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Web Frontend",
+                "description": "Client-side rendering of product pages, blog, cart, and account pages. Served over HTTPS.",
+                "outOfScope": false,
+                "privilegeLevel": "Unprivileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Cross-Site Scripting (XSS) via product/blog content",
+                    "description": "Unsanitized user-generated content (blog comments, product search) may be reflected or stored and executed as JavaScript in victim browsers.",
+                    "mitigation": "Implement output encoding. Use Content-Security-Policy headers. Sanitize all user inputs before rendering.",
+                    "threatId": "T-003",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Information Disclosure",
+                    "title": "JavaScript source code reveals internal API endpoints",
+                    "description": "Client-side JavaScript may expose internal API paths, parameter names, or business logic.",
+                    "mitigation": "Minify and obfuscate production JS. Avoid embedding sensitive configuration in frontend code.",
+                    "threatId": "T-004",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1180, "y": 60 },
+              "angle": 0,
+              "id": "process-auth",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Authentication\nService (/login)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Authentication Service",
+                "description": "Handles user login at /login endpoint. Username: carlos. Manages session cookies.",
+                "outOfScope": false,
+                "privilegeLevel": "Privileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Spoofing",
+                    "title": "Username enumeration via login response differences",
+                    "description": "Different error messages for invalid username vs. invalid password allow attackers to enumerate valid usernames.",
+                    "mitigation": "Return identical error messages and response times for all failed login attempts.",
+                    "threatId": "T-005",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Spoofing",
+                    "title": "Brute force attack on login endpoint",
+                    "description": "No rate limiting on /login allows automated password guessing. Default user 'carlos' is publicly known.",
+                    "mitigation": "Implement account lockout, CAPTCHA, or exponential backoff. Add rate limiting per IP and per account.",
+                    "threatId": "T-006",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "SQL Injection in login form credentials",
+                    "description": "Username or password fields may be vulnerable to SQL injection, allowing authentication bypass.",
+                    "mitigation": "Use parameterized queries / prepared statements. Implement input validation.",
+                    "threatId": "T-007",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Repudiation",
+                    "title": "Insufficient authentication event logging",
+                    "description": "Failed and successful login attempts may not be logged with sufficient detail for forensic analysis.",
+                    "mitigation": "Log all authentication events with timestamp, IP, user agent. Alert on anomalous patterns.",
+                    "threatId": "T-008",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1360, "y": 60 },
+              "angle": 0,
+              "id": "process-product-catalog",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Product Catalog\n(/catalog)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Product Catalog",
+                "description": "Serves product listings and details at /catalog and /catalog/product?productId=N. Handles search functionality.",
+                "outOfScope": false,
+                "privilegeLevel": "Unprivileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Tampering",
+                    "title": "SQL Injection via productId parameter",
+                    "description": "The productId parameter in /catalog/product?productId= is likely vulnerable to SQL injection (product name 'Original Dry SQLi Cocktail' hints at this). Attacker can dump the database.",
+                    "mitigation": "Use parameterized queries. Validate that productId is a positive integer. Implement WAF rules.",
+                    "threatId": "T-009",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "SQL Injection via product search functionality",
+                    "description": "The search input in /catalog may pass unsanitized input to SQL queries.",
+                    "mitigation": "Use parameterized queries. Implement input length limits and character whitelist.",
+                    "threatId": "T-010",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Information Disclosure",
+                    "title": "Verbose error messages expose database structure",
+                    "description": "SQL errors may be returned directly to the client, revealing table names, column names, or DB version.",
+                    "mitigation": "Implement custom error pages. Log errors server-side. Never expose stack traces to users.",
+                    "threatId": "T-011",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Denial of Service",
+                    "title": "Resource exhaustion via unbounded search queries",
+                    "description": "Automated or malicious search queries with no rate limiting can exhaust server resources.",
+                    "mitigation": "Implement rate limiting, query timeouts, and pagination limits.",
+                    "threatId": "T-012",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1000, "y": 200 },
+              "angle": 0,
+              "id": "process-cart",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Shopping Cart\n(/catalog/cart)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Shopping Cart",
+                "description": "Manages cart state at /catalog/cart. Handles add/remove items and checkout process.",
+                "outOfScope": false,
+                "privilegeLevel": "Semi-Privileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Price manipulation via cart parameter tampering",
+                    "description": "Client-side price values submitted in cart POST requests may not be validated server-side, allowing price manipulation.",
+                    "mitigation": "Always calculate prices server-side using product IDs. Never trust client-submitted prices.",
+                    "threatId": "T-013",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Cross-Site Request Forgery (CSRF) on cart operations",
+                    "description": "Cart add/remove/checkout operations may lack CSRF protection, allowing attacker-controlled sites to trigger actions.",
+                    "mitigation": "Implement CSRF tokens on all state-changing operations. Use SameSite cookie attribute.",
+                    "threatId": "T-014",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Elevation of Privilege",
+                    "title": "Access other users' cart data",
+                    "description": "Cart session IDs may be predictable or cart data may be accessible by manipulating session/cart identifiers.",
+                    "mitigation": "Use cryptographically random session identifiers. Validate cart ownership server-side.",
+                    "threatId": "T-015",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1180, "y": 200 },
+              "angle": 0,
+              "id": "process-blog",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Blog\n(/blog)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Blog",
+                "description": "Blog at /blog and /blog/post?postId=N. Displays posts and may support comments.",
+                "outOfScope": false,
+                "privilegeLevel": "Unprivileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Tampering",
+                    "title": "SQL Injection via postId parameter",
+                    "description": "The postId parameter in /blog/post?postId= may be vulnerable to SQL injection allowing data exfiltration.",
+                    "mitigation": "Use parameterized queries. Validate postId as positive integer.",
+                    "threatId": "T-016",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Stored XSS via blog comments",
+                    "description": "If the blog supports comments, unsanitized comment content stored in the database can execute scripts in other users' browsers.",
+                    "mitigation": "Sanitize and encode all user-generated content. Implement CSP. Use HTML entity encoding.",
+                    "threatId": "T-017",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Tampering",
+                    "title": "Server-Side Template Injection (SSTI) in blog search",
+                    "description": "Blog search functionality may pass user input directly into server-side template engines.",
+                    "mitigation": "Never pass user input to template engines. Use logic-less templates or strict sandboxing.",
+                    "threatId": "T-018",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1360, "y": 200 },
+              "angle": 0,
+              "id": "process-newsletter",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Newsletter\nSubscription" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Newsletter Subscription",
+                "description": "Email subscription form present on multiple pages. Collects email addresses.",
+                "outOfScope": false,
+                "privilegeLevel": "Unprivileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Email header injection via subscription form",
+                    "description": "Email field in subscription form may not sanitize CRLF characters, allowing email header injection for spam relay.",
+                    "mitigation": "Validate email format strictly. Strip CR/LF characters. Use parameterized email libraries.",
+                    "threatId": "T-019",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Denial of Service",
+                    "title": "Email bombing via subscription form abuse",
+                    "description": "No CAPTCHA or rate limiting on subscription form allows bulk subscription requests, flooding mail infrastructure.",
+                    "mitigation": "Add CAPTCHA or double opt-in. Implement rate limiting per IP.",
+                    "threatId": "T-020",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Information Disclosure",
+                    "title": "Subscriber email harvesting",
+                    "description": "If subscriber confirmation is reflected in response, it may confirm email validity for attackers.",
+                    "mitigation": "Use consistent responses regardless of whether email is already subscribed.",
+                    "threatId": "T-021",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1000, "y": 340 },
+              "angle": 0,
+              "id": "process-coupon",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Coupon System\n(20% off)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Coupon System",
+                "description": "Handles coupon validation and application to shopping cart. '20% off everything' coupon advertised on site.",
+                "outOfScope": false,
+                "privilegeLevel": "Semi-Privileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Coupon code brute force / enumeration",
+                    "description": "No rate limiting on coupon validation allows attackers to brute-force valid coupon codes.",
+                    "mitigation": "Rate limit coupon validation attempts. Use cryptographically random coupon codes.",
+                    "threatId": "T-022",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Elevation of Privilege",
+                    "title": "Coupon reuse / stack discount attack",
+                    "description": "Coupons may be applicable multiple times or stackable, allowing unintended discount accumulation.",
+                    "mitigation": "Track coupon usage per user/order. Enforce single-use constraints server-side.",
+                    "threatId": "T-023",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Process",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1180, "y": 340 },
+              "angle": 0,
+              "id": "process-image-service",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Image Service\n(/image/scanme/)" }
+              },
+              "data": {
+                "type": "tm.Process",
+                "name": "Image Service",
+                "description": "Serves product and blog images from /image/scanme/ path. May process dynamic image requests.",
+                "outOfScope": false,
+                "privilegeLevel": "Unprivileged",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Information Disclosure",
+                    "title": "Path traversal in image serving endpoint",
+                    "description": "The /image/scanme/ endpoint may be vulnerable to path traversal attacks (e.g., ../../etc/passwd) to read arbitrary files.",
+                    "mitigation": "Validate and canonicalize file paths. Use allowlist of permitted directories. Run image service with minimal permissions.",
+                    "threatId": "T-024",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Server-Side Request Forgery (SSRF) via image URL parameter",
+                    "description": "If image service accepts URLs as parameters, attacker can make the server fetch internal resources.",
+                    "mitigation": "Use allowlist for permitted image sources. Block internal IP ranges. Disable URL-based image fetching.",
+                    "threatId": "T-025",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Denial of Service",
+                    "title": "Image processing DoS via malformed files",
+                    "description": "Malformed image files (image bombs) submitted to processing endpoints can exhaust CPU/memory.",
+                    "mitigation": "Implement file size limits, processing timeouts, and image format validation.",
+                    "threatId": "T-026",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Store",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1000, "y": 500 },
+              "angle": 0,
+              "id": "store-database",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Database\n(Products/Users/Orders)" }
+              },
+              "data": {
+                "type": "tm.Store",
+                "name": "Application Database",
+                "description": "Backend database storing products, user accounts (carlos), blog posts, orders, coupons, and subscriber emails.",
+                "outOfScope": false,
+                "isEncrypted": false,
+                "isSigned": false,
+                "storesCredentials": true,
+                "storesPII": true,
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Information Disclosure",
+                    "title": "Plaintext password storage",
+                    "description": "User passwords (including default user 'carlos') may be stored in plaintext or with weak hashing.",
+                    "mitigation": "Store passwords using bcrypt/scrypt/Argon2 with appropriate work factors. Never store plaintext.",
+                    "threatId": "T-027",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Tampering",
+                    "title": "SQL Injection leading to data manipulation",
+                    "description": "SQL injection vulnerabilities across multiple endpoints can allow attackers to INSERT, UPDATE, DELETE, or DROP database objects.",
+                    "mitigation": "Use parameterized queries everywhere. Implement least-privilege database accounts.",
+                    "threatId": "T-028",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Information Disclosure",
+                    "title": "PII data exposure via SQL injection",
+                    "description": "Database contains PII (user emails, names, addresses). SQL injection can expose all stored PII.",
+                    "mitigation": "Encrypt PII at rest. Implement column-level encryption for sensitive fields. Regular security audits.",
+                    "threatId": "T-029",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Denial of Service",
+                    "title": "Database resource exhaustion via complex queries",
+                    "description": "Injected time-based or heavy queries (e.g., SLEEP(), cartesian joins) can exhaust database resources.",
+                    "mitigation": "Set query timeouts. Monitor for long-running queries. Implement connection pooling limits.",
+                    "threatId": "T-030",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Store",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1200, "y": 500 },
+              "angle": 0,
+              "id": "store-session",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Session Store\n(Cookies/Tokens)" }
+              },
+              "data": {
+                "type": "tm.Store",
+                "name": "Session Store",
+                "description": "Stores user session data including authentication tokens and cart state.",
+                "outOfScope": false,
+                "isEncrypted": false,
+                "isSigned": false,
+                "storesCredentials": true,
+                "storesPII": false,
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Information Disclosure",
+                    "title": "Session token predictability",
+                    "description": "Session tokens may be generated with weak randomness, allowing prediction or brute-forcing of valid sessions.",
+                    "mitigation": "Use cryptographically secure random session token generation (e.g., 128-bit entropy minimum).",
+                    "threatId": "T-031",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Session fixation attack",
+                    "description": "Application may not regenerate session ID after login, allowing session fixation attacks.",
+                    "mitigation": "Always regenerate session ID upon authentication. Invalidate old session on login.",
+                    "threatId": "T-032",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Store",
+              "size": { "width": 130, "height": 60 },
+              "position": { "x": 1380, "y": 500 },
+              "angle": 0,
+              "id": "store-static-files",
+              "z": 2,
+              "attrs": {
+                "text": { "text": "Static File Store\n(/resources/)" }
+              },
+              "data": {
+                "type": "tm.Store",
+                "name": "Static File Store",
+                "description": "Serves static resources including CSS, JS, images from /resources/ path.",
+                "outOfScope": false,
+                "isEncrypted": false,
+                "isSigned": false,
+                "storesCredentials": false,
+                "storesPII": false,
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Medium",
+                    "type": "Information Disclosure",
+                    "title": "Directory listing exposes file structure",
+                    "description": "Web server directory listing may be enabled, exposing file names and directory structure.",
+                    "mitigation": "Disable directory listing. Ensure no sensitive files in public directories.",
+                    "threatId": "T-033",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Flow",
+              "source": { "id": "actor-anonymous-user" },
+              "target": { "id": "process-web-frontend" },
+              "vertices": [],
+              "id": "flow-1",
+              "attrs": {
+                "text": { "text": "HTTP/HTTPS GET/POST" }
+              },
+              "z": 3,
+              "data": {
+                "type": "tm.Flow",
+                "name": "User HTTP Requests",
+                "description": "HTTP/HTTPS requests from anonymous users to the web frontend. Includes page loads, form submissions.",
+                "outOfScope": false,
+                "isBidirectional": false,
+                "isEncrypted": true,
+                "isPublicNetwork": true,
+                "protocol": "HTTPS",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Information Disclosure",
+                    "title": "Sensitive data transmitted over HTTP (non-HTTPS)",
+                    "description": "If any pages are served over HTTP instead of HTTPS, credentials and session tokens are exposed.",
+                    "mitigation": "Enforce HTTPS everywhere. Implement HSTS headers. Redirect all HTTP to HTTPS.",
+                    "threatId": "T-034",
+                    "score": ""
+                  },
+                  {
+                    "status": "Open",
+                    "severity": "High",
+                    "type": "Tampering",
+                    "title": "Man-in-the-Middle attack on unencrypted traffic",
+                    "description": "Without enforced HTTPS, attacker on the network can intercept and modify traffic.",
+                    "mitigation": "Enable HSTS with long max-age and includeSubDomains. Use HTTPS certificate pinning.",
+                    "threatId": "T-035",
+                    "score": ""
+                  }
+                ]
+              }
+            },
+            {
+              "type": "tm.Flow",
+              "source": { "id": "actor-authenticated-user" },
+              "target": { "id": "process-auth" },
+              "vertices": [],
+              "id": "flow-2",
+              "attrs": {
+                "text": { "text": "Login credentials" }
+              },
+              "z": 3,
+              "data": {
+                "type": "tm.Flow",
+                "name": "Authentication Request",
+                "description": "POST /login with username and password credentials.",
+                "outOfScope": false,
+                "isBidirectional": false,
+                "isEncrypted": true,
+                "isPublicNetwork": true,
+                "protocol": "HTTPS POST",
+                "hasOpenThreats": false,
+                "threats": []
+              }
+            },
+            {
+              "type": "tm.Flow",
+              "source": { "id": "process-web-frontend" },
+              "target": { "id": "store-database" },
+              "vertices": [],
+              "id": "flow-3",
+              "attrs": {
+                "text": { "text": "SQL Queries" }
+              },
+              "z": 3,
+              "data": {
+                "type": "tm.Flow",
+                "name": "Database Queries",
+                "description": "SQL queries from application processes to the backend database.",
+                "outOfScope": false,
+                "isBidirectional": true,
+                "isEncrypted": false,
+                "isPublicNetwork": false,
+                "protocol": "SQL over TCP",
+                "hasOpenThreats": true,
+                "threats": [
+                  {
+                    "status": "Open",
+                    "severity": "Critical",
+                    "type": "Tampering",
+                    "title": "Unsanitized SQL queries enable injection",
+                    "description": "Application passes user input directly into SQL strings, enabling SQL injection attacks.",
+                    "mitigation": "Use ORM or parameterized queries for all database interactions.",
+                    "threatId": "T-036",
+                    "score": ""
+                  }
+                ]
+              }
+            }
+          ]
+        }
       }
     ],
-    "diagramTop": 1,
     "reviewer": "",
-    "threatTop": 0
+    "threatTop": 36
   }
 }
