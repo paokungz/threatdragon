@@ -1,0 +1,27 @@
+{
+  "version": "2.6.0",
+  "summary": {
+    "title": "ginandjuice.shop",
+    "owner": "paokungz",
+    "description": "An E-commerce web application for ginandjuice.shop. The system handles product catalog browsing, user authentication, shopping cart management, and integrates with an external Payment Gateway. It processes and stores customer PII, order history, and product data.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [
+      {
+        "id": 0,
+        "title": "E-commerce Architecture",
+        "diagramType": "STRIDE",
+        "placeholder": "New STRIDE diagram description",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "version": "2.6.0",
+        "cells": [],
+        "description": "ata flow diagram showing interactions between Customers, Admin, Web Application, Databases, and Payment Gateway."
+      }
+    ],
+    "diagramTop": 1,
+    "reviewer": "",
+    "threatTop": 0
+  }
+}
